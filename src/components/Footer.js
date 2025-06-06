@@ -23,19 +23,19 @@ const Footer = () => {
               technology and comprehensive resources.
             </p>
             <div className="mt-4">
-              <a href="#" className="text-info me-3 footer-social-icon">
+              <a href="/" className="text-info me-3 footer-social-icon">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-primary me-3 footer-social-icon">
+              <a href="/" className="text-primary me-3 footer-social-icon">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-info me-3 footer-social-icon">
+              <a href="/" className="text-info me-3 footer-social-icon">
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="text-danger me-3 footer-social-icon">
+              <a href="/" className="text-danger me-3 footer-social-icon">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-black footer-social-icon">
+              <a href="/" className="text-black footer-social-icon">
                 <Github size={20} />
               </a>
             </div>

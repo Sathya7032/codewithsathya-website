@@ -12,6 +12,7 @@ import {
 import "./TutorialsPage.css";
 import HeaderWithNavbar from "../components/HeaderWithNavbar";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 const TutorialsPage = () => {
   const [tutorials, setTutorials] = useState([]);
@@ -170,18 +171,18 @@ const TutorialsPage = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="search-container">
-              <div className="search-bar">
+            <div className="search-container-tutorials">
+              <div className="search-bar-tutorials">
                 <FiSearch className="search-icon" />
                 <input
                   type="text"
                   placeholder="Search tutorials..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
+                  className="search-input-tutorials"
                 />
                 {searchTerm && (
-                  <button onClick={clearSearch} className="clear-search">
+                  <button onClick={clearSearch} className="clear-search-tutorials">
                     <FiX />
                   </button>
                 )}
@@ -357,6 +358,8 @@ const TutorialsPage = () => {
                       <p className="card-description">
                         {truncateText(tutorial.content)}
                       </p>
+                      
+                      <Link to={`/topics/${tutorial.slug}`}><button style={{width:'100%', backgroundColor:'darkslategray'}} className="btn btn-success">View Topics</button></Link>
                       <div className="card-footer">
                         <div className="footer-meta">
                           <span className="meta-item">

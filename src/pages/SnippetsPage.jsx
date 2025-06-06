@@ -129,19 +129,19 @@ const SnippetsPage = () => {
         
         <div className="filters-container">
           {/* Search Bar */}
-          <div className="search-container">
-            <div className="search-bar">
-              <FiSearch className="search-icon" />
+          <div className="search-container-code">
+            <div className="search-bar-code">
+              <FiSearch className="search-icon-code" />
               <input
                 type="text"
                 placeholder="Search snippets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
+                className="search-input-code"
                 
               />
               {searchTerm && (
-                <button onClick={clearSearch} className="clear-search">
+                <button onClick={clearSearch} className="clear-search-code">
                   <FiX />
                 </button>
               )}

@@ -32,13 +32,13 @@
   flex-wrap: wrap;
 }
 
-.search-container {
+.search-container-code {
   flex: 1;
   max-width: 500px;
   min-width: 300px;
 }
 
-.search-bar {
+.search-bar-code {
   position: relative;
   display: flex;
   align-items: center;
@@ -50,18 +50,18 @@
   border: 1px solid #e0e0e0;
 }
 
-.search-bar:focus-within {
+.search-bar-code:focus-within {
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
   border-color: #3498db;
 }
 
-.search-icon {
+.search-icon-code {
   color: #7f8c8d;
   font-size: 1.2rem;
   margin-right: 10px;
 }
 
-.search-input {
+.search-input-code {
   flex: 1;
   border: none;
   outline: none;
@@ -70,12 +70,12 @@
   background: transparent;
 }
 
-.search-input::placeholder {
+.search-input-code::placeholder {
   color: #95a5a6;
   padding-left: 10%;
 }
 
-.clear-search {
+.clear-search-code {
   background: none;
   border: none;
   color: #95a5a6;
@@ -88,7 +88,7 @@
   transition: color 0.2s;
 }
 
-.clear-search:hover {
+.clear-search-code:hover {
   color: #e74c3c;
 }
 

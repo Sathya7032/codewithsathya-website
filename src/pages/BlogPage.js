@@ -84,18 +84,18 @@ const BlogPage = () => {
         <p>Insights and tutorials on programming technologies</p>
         
         {/* Professional Search Bar */}
-        <div className="search-container">
-          <div className="search-bar">
-            <FiSearch className="search-icon" />
+        <div className="search-container-blog">
+          <div className="search-bar-blog">
+            <FiSearch className="search-icon-blog" />
             <input
               type="text"
               placeholder="Search blog posts by title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
+              className="search-input-blog"
             />
             {searchTerm && (
-              <button onClick={clearSearch} className="clear-search">
+              <button onClick={clearSearch} className="clear-search-blog">
                 <FiX />
               </button>
             )}

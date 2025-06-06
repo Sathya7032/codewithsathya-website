@@ -183,7 +183,7 @@ const TechnologyDetail = () => {
             {technology.tutorials.length > 0 ? (
               technology.tutorials.map(tutorial => (
                 <Link 
-                  to={`/tutorials/${tutorial.slug}`} 
+                  to={`/topics/${tutorial.slug}`} 
                   key={tutorial.id} 
                   className="tech-item-card"
                 >

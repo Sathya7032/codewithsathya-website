@@ -1,0 +1,119 @@
+/* Base Container */
+.topics-container {
+    min-height: 100vh;
+    background-color: #2f4f4f;
+    color: #f8f9fa;
+    padding-top: 20px;
+    padding-bottom: 40px;
+  }
+  
+  /* Search Box Styles */
+  .search-box-topics {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .search-input-topics {
+    background-color: #f0f4f4;
+    border: 1px solid #4a6f6f;
+    color: #000509;
+  }
+  
+  .search-input-topics:focus {
+    background-color: #eff0f0;
+    color: #0e0e0f;
+    border-color: #20b2aa;
+    box-shadow: 0 0 0 0.25rem rgba(242, 245, 245, 0.25);
+  }
+  
+  .search-button-topics {
+    border-color: #eff6f6;
+    transition: all 0.3s ease;
+  }
+  
+  .search-button-topics:hover {
+    background-color: #20b2aa;
+    border-color: #20b2aa;
+  }
+  
+  /* Topic Card */
+  .topic-card {
+    background-color: #ecf3f3;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .topic-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Title Styles */
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  
+  .active-title {
+    color: darkslategrey !important;
+  }
+  
+  .text-primary {
+    color: #7fffd4 !important; /* Slightly brighter for better visibility */
+    transition: color 0.3s ease;
+  }
+  
+  /* Content Styles */
+  .content-html {
+    line-height: 1.8;
+  }
+  
+  .content-html p {
+    margin-bottom: 1rem;
+  }
+  
+  .content-html a {
+    color: #20b2aa;
+    text-decoration: none;
+  }
+  
+  .content-html a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Code Snippet */
+  .code-snippet {
+    background-color: #1e3a3a;
+    color: #e9ecef;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    border-left: 4px solid #20b2aa;
+  }
+  
+  /* Badges */
+  .tag-badge {
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #4a6f6f !important;
+  }
+  
+  /* Divider */
+  .divider {
+    border-top: 1px solid #20b2aa;
+    opacity: 0.3;
+    margin: 1.5rem 0;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .search-box {
+      max-width: 100%;
+    }
+    
+    .topic-card {
+      margin-bottom: 20px;
+    }
+  }
