@@ -11,7 +11,7 @@ import {
   Button
 } from 'react-bootstrap';
 import './topics.css';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import HeaderWithNavbar from '../components/HeaderWithNavbar'
 import Footer from '../components/Footer'
 
@@ -162,6 +162,8 @@ const TutorialTopics = () => {
                         <code>{topic.code_snippet}</code>
                       </pre>
                     )}
+                    <Link to={`/topic/${topic.slug}`}>
+                    <button style={{width:'100%', backgroundColor:'darkslategray'}} className='btn btn-dark'>View Topic</button></Link>
 
                     {topic.video_url && (
                       <div className="mt-3">
