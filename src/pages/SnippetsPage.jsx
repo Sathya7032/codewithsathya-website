@@ -220,7 +220,7 @@ const SnippetsPage = () => {
                   <span className="snippet-date">{formatDate(snippet.created_at)}</span>
                 </div>
                 <h2 className="snippet-title">{snippet.title}</h2>
-                <p className="snippet-desc">{snippet.description}</p>
+              
                 <div className="snippet-tags">
                   {snippet.tags.map((tag, index) => (
                     <span key={index} className="tag">{tag}</span>
@@ -231,6 +231,10 @@ const SnippetsPage = () => {
 
               {expandedSnippet === snippet.id && (
                 <div className="snippet-content">
+                  <div 
+                    className="content-html" 
+                    dangerouslySetInnerHTML={{ __html: snippet.description }} 
+                  />
                   <div className="code-container">
                     <SyntaxHighlighter
                       language={snippet.language.toLowerCase()}
