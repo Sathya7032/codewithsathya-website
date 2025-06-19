@@ -7,6 +7,8 @@ import SnippetsPage from './pages/SnippetsPage';
 import TechnologyDetail from './pages/TechnologyDetail';
 import TutorialsPage from './pages/TutorialsPage';
 import TutorialTopics from './pages/TutorialTopics';
+import TutorialPage from './pages/TutorialPage';
+import BlogViewPage from './pages/BlogViewPage';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       <Route element={<TechnologyDetail/>} path='/technologies/:slug'/>
       <Route element={<TutorialsPage />} path='/tutorials'/>
       <Route element={<TutorialTopics/>} path='/topics/:slug' />
+      <Route element={<TutorialPage/>} path='/topic/:slug' />
+      <Route element={<BlogViewPage/>} path='/blog/:slug' />
     </Routes>
     </BrowserRouter>
   );

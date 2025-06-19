@@ -8,12 +8,19 @@ import {
   Alert, 
   Form, 
   InputGroup,
-  Button
+  Button,
+  Tabs,
+  Tab
 } from 'react-bootstrap';
 import './topics.css';
-import { useParams } from 'react-router-dom';
-import HeaderWithNavbar from '../components/HeaderWithNavbar'
-import Footer from '../components/Footer'
+import { Link, useParams } from 'react-router-dom';
+import HeaderWithNavbar from '../components/HeaderWithNavbar';
+import Footer from '../components/Footer';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { python } from '@codemirror/lang-python';
+import { json } from '@codemirror/lang-json';
 
 const TutorialTopics = () => {
   const [topics, setTopics] = useState([]);
@@ -22,7 +29,26 @@ const TutorialTopics = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedTopicId, setExpandedTopicId] = useState(null);
+  const [activeTab, setActiveTab] = useState('content');
   const { slug } = useParams();
+
+  const createMarkup = (htmlContent) => {
+    // Process images within figure elements to make them responsive
+    const processedHtml = htmlContent
+      // Remove fixed width/height from images but keep aspect ratio
+      .replace(/<img([^>]*)style="[^"]*aspect-ratio:([^;]+);[^"]*"/g, 
+        '<img$1style="max-width:100%;height:auto;"')
+      // Remove fixed width/height attributes
+      .replace(/<img([^>]*)width="[^"]*"/g, '<img$1')
+      .replace(/<img([^>]*)height="[^"]*"/g, '<img$1')
+      // Make figure elements responsive
+      .replace(/<figure class="image image_resized" style="width:[^;]+;"/g, 
+        '<figure class="image-container" style="max-width:100%;"')
+      // Add bootstrap responsive image class
+      .replace(/<img([^>]*)>/g, '<img class="img-fluid"$1>');
+  
+    return { __html: processedHtml };
+  };
 
   useEffect(() => {
     const fetchTopics = async () => {
@@ -32,7 +58,7 @@ const TutorialTopics = () => {
         setFilteredTopics(response.data.topics || []);
       } catch (err) {
         setError(err.message);
-        setFilteredTopics([]); // Ensure filteredTopics is set even on error
+        setFilteredTopics([]);
       } finally {
         setLoading(false);
       }
@@ -52,8 +78,8 @@ const TutorialTopics = () => {
       topic.title.toLowerCase().includes(searchTermLower) ||
       (topic.tags && topic.tags.some(tag => 
         tag.toLowerCase().includes(searchTermLower)
-      )
-    ));
+      ))
+    );
     
     setFilteredTopics(results);
   }, [searchTerm, topics]);
@@ -65,6 +91,18 @@ const TutorialTopics = () => {
 
   const toggleExpand = (id) => {
     setExpandedTopicId(expandedTopicId === id ? null : id);
+  };
+
+  const getCodeMirrorLanguage = (codeSnippet) => {
+    if (!codeSnippet) return null;
+    
+    // Simple detection - in a real app you might want more sophisticated detection
+    if (codeSnippet.includes('function') || codeSnippet.includes('const')) return javascript();
+    if (codeSnippet.includes('<html') || codeSnippet.includes('<div')) return html();
+    if (codeSnippet.includes('def ') || codeSnippet.includes('import ')) return python();
+    if (codeSnippet.trim().startsWith('{') || codeSnippet.trim().startsWith('[')) return json();
+    
+    return null;
   };
 
   if (loading) {
@@ -93,102 +131,117 @@ const TutorialTopics = () => {
 
   return (
     <>
-    <HeaderWithNavbar/>
-    <div className="topics-container">
-      <Container className="py-4">
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h1 className="text-light mb-3 mb-md-0">Tutorial Topics</h1>
-          
-          <Form.Group className="search-box-topics">
-            <InputGroup>
-              <Form.Control
-                type="text"
-                placeholder="Search by title or tag..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input-topics"
-              />
-              <Button variant="outline-light" className="search-button-topics">
-                <i className="bi bi-search"></i>
-              </Button>
-            </InputGroup>
-          </Form.Group>
-        </div>
+      <HeaderWithNavbar/>
+      <div className="topics-container">
+        <Container className="py-4">
+          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+            <h1 className="text-light mb-3 mb-md-0">Tutorial Topics</h1>
+            
+            <Form.Group className="search-box-topics">
+              <InputGroup>
+                <Form.Control
+                  type="text"
+                  placeholder="Search by title or tag..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input-topics"
+                />
+                <Button variant="outline-light" className="search-button-topics">
+                  <i className="bi bi-search"></i>
+                </Button>
+              </InputGroup>
+            </Form.Group>
+          </div>
 
-        {filteredTopics.length === 0 ? (
-          <Alert variant="info" className="text-center">
-            {searchTerm ? 'No matching topics found.' : 'No topics available.'}
-          </Alert>
-        ) : (
-          filteredTopics.map((topic) => (
-            <Card key={topic.id} className="mb-4 topic-card">
-              <Card.Body>
-                <div 
-                  className="d-flex justify-content-between align-items-center mb-3 cursor-pointer"
-                  onClick={() => toggleExpand(topic.id)}
-                >
-                  <Card.Title 
-                    className={`text-dark ${expandedTopicId === topic.id ? 'active-title' : ''}`}
+          {filteredTopics.length === 0 ? (
+            <Alert variant="info" className="text-center">
+              {searchTerm ? 'No matching topics found.' : 'No topics available.'}
+            </Alert>
+          ) : (
+            filteredTopics.map((topic) => (
+              <Card key={topic.id} className="mb-4 topic-card">
+                <Card.Body>
+                  <div 
+                    className="d-flex justify-content-between align-items-center mb-3 cursor-pointer"
+                    onClick={() => toggleExpand(topic.id)}
                   >
-                    {topic.title}
-                    <i className={`bi bi-chevron-${expandedTopicId === topic.id ? 'up' : 'down'} ms-2`}></i>
-                  </Card.Title>
-                  {topic.is_free && (
-                    <Badge bg="success" className="fs-6">
-                      FREE
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  {topic.tags.map((tag, index) => (
-                    <Badge key={index} bg="secondary" className="me-2 tag-badge">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-
-                {expandedTopicId === topic.id && (
-                  <>
-                    <hr className="divider" />
-
-                    <div
-                      className="content-html"
-                      dangerouslySetInnerHTML={{ __html: topic.content }}
-                    />
-
-                    {topic.code_snippet && (
-                      <pre className="code-snippet mt-3">
-                        <code>{topic.code_snippet}</code>
-                      </pre>
+                    <Card.Title 
+                      className={`text-dark ${expandedTopicId === topic.id ? 'active-title' : ''}`}
+                    >
+                      {topic.title}
+                      <i className={`bi bi-chevron-${expandedTopicId === topic.id ? 'up' : 'down'} ms-2`}></i>
+                    </Card.Title>
+                    {topic.is_free && (
+                      <Badge bg="success" className="fs-6">
+                        FREE
+                      </Badge>
                     )}
+                  </div>
 
-                    {topic.video_url && (
-                      <div className="mt-3">
-                        <h6 className="text-muted">Video Tutorial:</h6>
-                        <div className="ratio ratio-16x9">
-                          <iframe
-                            src={topic.video_url}
-                            title={topic.title}
-                            allowFullScreen
+                  <div className="mb-3">
+                    {topic.tags.map((tag, index) => (
+                      <Badge key={index} bg="secondary" className="me-2 tag-badge">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {expandedTopicId === topic.id && (
+                    <div className="mt-3">
+                      <Tabs
+                        activeKey={activeTab}
+                        onSelect={(k) => setActiveTab(k)}
+                        className="mb-3"
+                      >
+                        <Tab eventKey="content" title="Content">
+                          <div 
+                            className="content-container mt-3"
+                            dangerouslySetInnerHTML={createMarkup(topic.content)} 
                           />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="d-flex justify-content-between mt-4 text-muted small">
-                      <span>Created: {formatDate(topic.created_at)}</span>
-                      <span>Updated: {formatDate(topic.updated_at)}</span>
+                        </Tab>
+                        <Tab eventKey="code" title="Code Snippet" disabled={!topic.code_snippet}>
+                          {topic.code_snippet && (
+                            <CodeMirror
+                              value={topic.code_snippet}
+                              extensions={[getCodeMirrorLanguage(topic.code_snippet)]}
+                              readOnly={true}
+                              theme="dark"
+                              height="auto"
+                              className="code-mirror-container"
+                            />
+                          )}
+                        </Tab>
+                        <Tab eventKey="json" title="JSON Data">
+                          <CodeMirror
+                            value={JSON.stringify(topic, null, 2)}
+                            extensions={[json()]}
+                            readOnly={true}
+                            theme="light"
+                            height="auto"
+                            className="code-mirror-container"
+                          />
+                        </Tab>
+                      </Tabs>
                     </div>
-                  </>
-                )}
-              </Card.Body>
-            </Card>
-          ))
-        )}
-      </Container>
-    </div>
-    <Footer/>
+                  )}
+
+                  <Link to={`/topic/${topic.slug}`}>
+                    <button style={{width: '100%', backgroundColor: 'darkslategray'}} className='btn btn-dark'>
+                      View Full Topic
+                    </button>
+                  </Link>      
+
+                  <div className="d-flex justify-content-between mt-4 text-muted small">
+                    <span>Created: {formatDate(topic.created_at)}</span>
+                    <span>Updated: {formatDate(topic.updated_at)}</span>
+                  </div>            
+                </Card.Body>
+              </Card>
+            ))
+          )}
+        </Container>
+      </div>
+      <Footer/>
     </>
   );
 };

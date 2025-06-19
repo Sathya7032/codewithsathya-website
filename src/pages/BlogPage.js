@@ -3,6 +3,9 @@ import { FiSearch, FiX } from 'react-icons/fi';
 import './BlogPage.css';
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
+import { Button } from 'react-bootstrap';
+import { FaArrowRight } from 'react-icons/fa';
 
 const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
@@ -122,6 +125,7 @@ const BlogPage = () => {
                   <span className="blog-date">{formatDate(blog.published_date)}</span>
                 </div>
                 <h2 className="blog-title">{blog.title}</h2>
+                <Link to={`/blog/${blog.slug}`}><h5 style={{textDecoration:'none', color:'skyblue'}}>Read the full blog ---- <FaArrowRight/></h5></Link>
                 <p className="blog-excerpt">{blog.excerpt}</p>
                 <div className="blog-tags">
                   {blog.tags.map((tag, index) => (
@@ -130,20 +134,6 @@ const BlogPage = () => {
                 </div>
                 <div className="blog-author">By {blog.author}</div>
               </div>
-
-              {expandedBlog === blog.id && (
-                <div className="blog-content">
-                  <div 
-                    className="content-html" 
-                    dangerouslySetInnerHTML={{ __html: blog.content }} 
-                  />
-                  {blog.thumbnail && (
-                    <div className="blog-thumbnail">
-                      <img src={blog.thumbnail} alt={blog.title} />
-                    </div>
-                  )}
-                </div>
-              )}
             </article>
           ))
         ) : (
