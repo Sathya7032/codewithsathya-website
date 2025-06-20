@@ -158,7 +158,6 @@
   .accordion-button:focus {
     box-shadow: none;
     border-color: rgba(0,0,0,.125);
-<<<<<<< HEAD
   }
 
 /* Image styling */
@@ -208,6 +207,3 @@
   max-width: 100%;
   height: auto;
 }
-=======
-  }
->>>>>>> 2e6663f9aabc6d772efe20fb65e2a25d5ed0f890
