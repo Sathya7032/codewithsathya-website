@@ -8,7 +8,10 @@ import TechnologyDetail from './pages/TechnologyDetail';
 import TutorialsPage from './pages/TutorialsPage';
 import TutorialTopics from './pages/TutorialTopics';
 import TutorialPage from './pages/TutorialPage';
+<<<<<<< HEAD
 import BlogViewPage from './pages/BlogViewPage';
+=======
+>>>>>>> 2e6663f9aabc6d772efe20fb65e2a25d5ed0f890
 
 function App() {
   return (
@@ -22,7 +25,10 @@ function App() {
       <Route element={<TutorialsPage />} path='/tutorials'/>
       <Route element={<TutorialTopics/>} path='/topics/:slug' />
       <Route element={<TutorialPage/>} path='/topic/:slug' />
+<<<<<<< HEAD
       <Route element={<BlogViewPage/>} path='/blog/:slug' />
+=======
+>>>>>>> 2e6663f9aabc6d772efe20fb65e2a25d5ed0f890
     </Routes>
     </BrowserRouter>
   );

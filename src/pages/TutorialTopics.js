@@ -14,6 +14,7 @@ import {
 } from 'react-bootstrap';
 import './topics.css';
 import { Link, useParams } from 'react-router-dom';
+<<<<<<< HEAD
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
 import CodeMirror from '@uiw/react-codemirror';
@@ -21,6 +22,10 @@ import { javascript } from '@codemirror/lang-javascript';
 import { html } from '@codemirror/lang-html';
 import { python } from '@codemirror/lang-python';
 import { json } from '@codemirror/lang-json';
+=======
+import HeaderWithNavbar from '../components/HeaderWithNavbar'
+import Footer from '../components/Footer'
+>>>>>>> 2e6663f9aabc6d772efe20fb65e2a25d5ed0f890
 
 const TutorialTopics = () => {
   const [topics, setTopics] = useState([]);
@@ -176,7 +181,12 @@ const TutorialTopics = () => {
                         FREE
                       </Badge>
                     )}
+<<<<<<< HEAD
                   </div>
+=======
+                    <Link to={`/topic/${topic.slug}`}>
+                    <button style={{width:'100%', backgroundColor:'darkslategray'}} className='btn btn-dark'>View Topic</button></Link>
+>>>>>>> 2e6663f9aabc6d772efe20fb65e2a25d5ed0f890
 
                   <div className="mb-3">
                     {topic.tags.map((tag, index) => (
