@@ -9,18 +9,14 @@ import {
   Form, 
   InputGroup,
   Button,
-  Tabs,
-  Tab
+  Row,
+  Col
 } from 'react-bootstrap';
 import './topics.css';
 import { Link, useParams } from 'react-router-dom';
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { html } from '@codemirror/lang-html';
-import { python } from '@codemirror/lang-python';
-import { json } from '@codemirror/lang-json';
+import { FlaskFlorence, Search } from 'react-bootstrap-icons';
 
 const TutorialTopics = () => {
   const [topics, setTopics] = useState([]);
@@ -28,34 +24,17 @@ const TutorialTopics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedTopicId, setExpandedTopicId] = useState(null);
-  const [activeTab, setActiveTab] = useState('content');
   const { slug } = useParams();
-
-  const createMarkup = (htmlContent) => {
-    // Process images within figure elements to make them responsive
-    const processedHtml = htmlContent
-      // Remove fixed width/height from images but keep aspect ratio
-      .replace(/<img([^>]*)style="[^"]*aspect-ratio:([^;]+);[^"]*"/g, 
-        '<img$1style="max-width:100%;height:auto;"')
-      // Remove fixed width/height attributes
-      .replace(/<img([^>]*)width="[^"]*"/g, '<img$1')
-      .replace(/<img([^>]*)height="[^"]*"/g, '<img$1')
-      // Make figure elements responsive
-      .replace(/<figure class="image image_resized" style="width:[^;]+;"/g, 
-        '<figure class="image-container" style="max-width:100%;"')
-      // Add bootstrap responsive image class
-      .replace(/<img([^>]*)>/g, '<img class="img-fluid"$1>');
-  
-    return { __html: processedHtml };
-  };
 
   useEffect(() => {
     const fetchTopics = async () => {
       try {
         const response = await axios.get(`https://codewithsathya.pythonanywhere.com/tutorials/${slug}/`);
-        setTopics(response.data.topics || []);
-        setFilteredTopics(response.data.topics || []);
+        const sortedTopics = (response.data.topics || []).sort((a, b) => 
+          new Date(b.updated_at) - new Date(a.updated_at)
+        );
+        setTopics(sortedTopics);
+        setFilteredTopics(sortedTopics);
       } catch (err) {
         setError(err.message);
         setFilteredTopics([]);
@@ -76,6 +55,7 @@ const TutorialTopics = () => {
     const searchTermLower = searchTerm.toLowerCase();
     const results = topics.filter(topic => 
       topic.title.toLowerCase().includes(searchTermLower) ||
+      (topic.description && topic.description.toLowerCase().includes(searchTermLower)) ||
       (topic.tags && topic.tags.some(tag => 
         tag.toLowerCase().includes(searchTermLower)
       ))
@@ -85,32 +65,18 @@ const TutorialTopics = () => {
   }, [searchTerm, topics]);
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  const toggleExpand = (id) => {
-    setExpandedTopicId(expandedTopicId === id ? null : id);
-  };
-
-  const getCodeMirrorLanguage = (codeSnippet) => {
-    if (!codeSnippet) return null;
-    
-    // Simple detection - in a real app you might want more sophisticated detection
-    if (codeSnippet.includes('function') || codeSnippet.includes('const')) return javascript();
-    if (codeSnippet.includes('<html') || codeSnippet.includes('<div')) return html();
-    if (codeSnippet.includes('def ') || codeSnippet.includes('import ')) return python();
-    if (codeSnippet.trim().startsWith('{') || codeSnippet.trim().startsWith('[')) return json();
-    
-    return null;
   };
 
   if (loading) {
     return (
       <div className="topics-container">
         <Container className="text-center py-5">
-          <Spinner animation="border" variant="light" />
-          <h5 className="mt-3 text-light">Loading Tutorials...</h5>
+          <Spinner animation="border" role="status" className="text-primary">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <h5 className="mt-3 text-light">Loading Tutorial Topics...</h5>
         </Container>
       </div>
     );
@@ -120,9 +86,10 @@ const TutorialTopics = () => {
     return (
       <div className="topics-container">
         <Container className="py-5">
-          <Alert variant="danger">
-            <Alert.Heading>Error Loading Data</Alert.Heading>
-            <p>{error}</p>
+          <Alert variant="danger" className="shadow">
+            <Alert.Heading>Error Loading Tutorial Content</Alert.Heading>
+            <p>We couldn't load the tutorial topics at this time. Please try again later.</p>
+            <p className="mb-0"><small>Technical details: {error}</small></p>
           </Alert>
         </Container>
       </div>
@@ -132,112 +99,108 @@ const TutorialTopics = () => {
   return (
     <>
       <HeaderWithNavbar/>
-      <div className="topics-container">
-        <Container className="py-4">
-          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-            <h1 className="text-light mb-3 mb-md-0">Tutorial Topics</h1>
-            
-            <Form.Group className="search-box-topics">
-              <InputGroup>
-                <Form.Control
-                  type="text"
-                  placeholder="Search by title or tag..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input-topics"
-                />
-                <Button variant="outline-light" className="search-button-topics">
-                  <i className="bi bi-search"></i>
-                </Button>
-              </InputGroup>
-            </Form.Group>
-          </div>
+      <div className="topics-container bg-light">
+        <Container className="py-5">
+          <Row className="mb-4 align-items-end">
+            <Col md={6}>
+              <h1 className="text-dark mb-2">Tutorial Topics</h1>
+              <p className="text-muted">Explore all available learning materials</p>
+            </Col>
+            <Col md={6}>
+              <Form.Group>
+                <InputGroup className="shadow-sm">
+                  <Form.Control
+                    type="search"
+                    placeholder="Search topics by title, description or tags..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="border-end-0"
+                  />
+                  <Button variant="primary" className="border-start-0">
+                    <Search/>
+                  </Button>
+                </InputGroup>
+              </Form.Group>
+            </Col>
+          </Row>
 
           {filteredTopics.length === 0 ? (
-            <Alert variant="info" className="text-center">
-              {searchTerm ? 'No matching topics found.' : 'No topics available.'}
+            <Alert variant="info" className="shadow-sm">
+              {searchTerm ? (
+                <>
+                  <h5>No matching topics found</h5>
+                  <p className="mb-0">Try adjusting your search or browse all topics by clearing the search field.</p>
+                </>
+              ) : (
+                <>
+                  <h5>No topics available yet</h5>
+                  <p className="mb-0">Check back soon as we're regularly adding new content.</p>
+                </>
+              )}
             </Alert>
           ) : (
-            filteredTopics.map((topic) => (
-              <Card key={topic.id} className="mb-4 topic-card">
-                <Card.Body>
-                  <div 
-                    className="d-flex justify-content-between align-items-center mb-3 cursor-pointer"
-                    onClick={() => toggleExpand(topic.id)}
-                  >
-                    <Card.Title 
-                      className={`text-dark ${expandedTopicId === topic.id ? 'active-title' : ''}`}
-                    >
-                      {topic.title}
-                      <i className={`bi bi-chevron-${expandedTopicId === topic.id ? 'up' : 'down'} ms-2`}></i>
-                    </Card.Title>
-                    {topic.is_free && (
-                      <Badge bg="success" className="fs-6">
-                        FREE
-                      </Badge>
-                    )}
-                  </div>
+            <Row xs={1} md={2} lg={3} className="g-4">
+              {filteredTopics.map((topic) => (
+                <Col key={topic.id}>
+                  <Card className="h-100 shadow-sm border-0">
+                    <Card.Body className="d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <Card.Title className="text-dark mb-0">
+                          <Link to={`/topic/${topic.slug}`} className="text-decoration-none text-dark">
+                            {topic.title}
+                          </Link>
+                        </Card.Title>
+                        {topic.is_free && (
+                          <Badge bg="success" className="ms-2">
+                            FREE
+                          </Badge>
+                        )}
+                      </div>
 
-                  <div className="mb-3">
-                    {topic.tags.map((tag, index) => (
-                      <Badge key={index} bg="secondary" className="me-2 tag-badge">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+                      {topic.description && (
+                        <Card.Text className="text-muted mb-3 flex-grow-1">
+                          {topic.description.length > 120 
+                            ? `${topic.description.substring(0, 120)}...` 
+                            : topic.description}
+                        </Card.Text>
+                      )}
 
-                  {expandedTopicId === topic.id && (
-                    <div className="mt-3">
-                      <Tabs
-                        activeKey={activeTab}
-                        onSelect={(k) => setActiveTab(k)}
-                        className="mb-3"
-                      >
-                        <Tab eventKey="content" title="Content">
-                          <div 
-                            className="content-container mt-3"
-                            dangerouslySetInnerHTML={createMarkup(topic.content)} 
-                          />
-                        </Tab>
-                        <Tab eventKey="code" title="Code Snippet" disabled={!topic.code_snippet}>
-                          {topic.code_snippet && (
-                            <CodeMirror
-                              value={topic.code_snippet}
-                              extensions={[getCodeMirrorLanguage(topic.code_snippet)]}
-                              readOnly={true}
-                              theme="dark"
-                              height="auto"
-                              className="code-mirror-container"
-                            />
-                          )}
-                        </Tab>
-                        <Tab eventKey="json" title="JSON Data">
-                          <CodeMirror
-                            value={JSON.stringify(topic, null, 2)}
-                            extensions={[json()]}
-                            readOnly={true}
-                            theme="light"
-                            height="auto"
-                            className="code-mirror-container"
-                          />
-                        </Tab>
-                      </Tabs>
-                    </div>
-                  )}
+                      <div className="mb-3">
+                        {topic.tags?.map((tag, index) => (
+                          <Badge 
+                            key={index} 
+                            bg="light" 
+                            text="dark" 
+                            className="me-2 mb-2 border"
+                            style={{ fontWeight: 'normal' }}
+                          >
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
 
-                  <Link to={`/topic/${topic.slug}`}>
-                    <button style={{width: '100%', backgroundColor: 'darkslategray'}} className='btn btn-dark'>
-                      View Full Topic
-                    </button>
-                  </Link>      
-
-                  <div className="d-flex justify-content-between mt-4 text-muted small">
-                    <span>Created: {formatDate(topic.created_at)}</span>
-                    <span>Updated: {formatDate(topic.updated_at)}</span>
-                  </div>            
-                </Card.Body>
-              </Card>
-            ))
+                      <div className="mt-auto">
+                        <Link to={`/topic/${topic.slug}`} className="w-100">
+                          <Button variant="primary" className="w-100" style={{backgroundColor:"darkslategray"}}>
+                            View Topic <i className="bi bi-arrow-right ms-2"></i>
+                          </Button>
+                        </Link>
+                      </div>
+                    </Card.Body>
+                    <Card.Footer className="bg-white border-0 text-muted small">
+                      <div className="d-flex justify-content-between">
+                        <span title="Created date">
+                          <i className="bi bi-calendar-plus me-1"></i> {formatDate(topic.created_at)}
+                        </span>
+                        <span title="Last updated">
+                          <i className="bi bi-arrow-clockwise me-1"></i> {formatDate(topic.updated_at)}
+                        </span>
+                      </div>
+                    </Card.Footer>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
           )}
         </Container>
       </div>

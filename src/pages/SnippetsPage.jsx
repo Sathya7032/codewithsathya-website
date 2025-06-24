@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { FiSearch, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import './SnippetsPage.css'
+import { FiSearch, FiX, FiChevronDown, FiChevronUp, FiFilter, FiClock, FiCode } from 'react-icons/fi';
+import './SnippetsPage.css';
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
 
 const SnippetsPage = () => {
   const [snippets, setSnippets] = useState([]);
-  const [filteredSnippets, setFilteredSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSnippet, setExpandedSnippet] = useState(null);
@@ -19,21 +18,16 @@ const SnippetsPage = () => {
   });
   const [isTechDropdownOpen, setIsTechDropdownOpen] = useState(false);
   const [selectedTech, setSelectedTech] = useState('All Technologies');
+  const [selectedLanguage, setSelectedLanguage] = useState('All Languages');
 
+  // Fetch snippets on component mount
   useEffect(() => {
     const fetchSnippets = async () => {
       try {
         const response = await fetch('https://codewithsathya.pythonanywhere.com/snippets/');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        // Sort snippets initially by creation date (newest first)
-        const sortedSnippets = [...data].sort((a, b) => 
-          new Date(b.created_at) - new Date(a.created_at)
-        );
-        setSnippets(sortedSnippets);
-        setFilteredSnippets(sortedSnippets);
+        setSnippets(data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -44,7 +38,20 @@ const SnippetsPage = () => {
     fetchSnippets();
   }, []);
 
-  useEffect(() => {
+  // Get unique technologies for filter dropdown
+  const technologies = useMemo(() => {
+    const techs = snippets.map(snippet => snippet.technology);
+    return ['All Technologies', ...new Set(techs)].filter(Boolean);
+  }, [snippets]);
+
+  // Get unique languages for filter dropdown
+  const languages = useMemo(() => {
+    const langs = snippets.map(snippet => snippet.language);
+    return ['All Languages', ...new Set(langs)].filter(Boolean);
+  }, [snippets]);
+
+  // Filter and sort snippets based on current filters and sort config
+  const filteredSnippets = useMemo(() => {
     let result = [...snippets];
     
     // Apply technology filter
@@ -52,58 +59,78 @@ const SnippetsPage = () => {
       result = result.filter(snippet => snippet.technology === selectedTech);
     }
     
+    // Apply language filter
+    if (selectedLanguage !== 'All Languages') {
+      result = result.filter(snippet => snippet.language === selectedLanguage);
+    }
+    
     // Apply search filter
     if (searchTerm.trim() !== '') {
+      const term = searchTerm.toLowerCase();
       result = result.filter(snippet =>
-        snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        snippet.description.toLowerCase().includes(searchTerm.toLowerCase())
+        snippet.title.toLowerCase().includes(term) ||
+        snippet.description.toLowerCase().includes(term) ||
+        (snippet.tags && snippet.tags.some(tag => tag.toLowerCase().includes(term)))
       );
     }
     
     // Apply sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        
+        // Handle date comparison
+        if (sortConfig.key === 'created_at') {
+          return sortConfig.direction === 'ascending' 
+            ? new Date(aValue) - new Date(bValue)
+            : new Date(bValue) - new Date(aValue);
+        }
+        
+        // Handle string comparison
+        if (aValue < bValue) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (aValue > bValue) {
           return sortConfig.direction === 'ascending' ? 1 : -1;
         }
         return 0;
       });
     }
     
-    setFilteredSnippets(result);
-  }, [snippets, searchTerm, sortConfig, selectedTech]);
+    return result;
+  }, [snippets, searchTerm, sortConfig, selectedTech, selectedLanguage]);
 
+  // Toggle snippet expansion
   const toggleSnippet = (id) => {
-    if (expandedSnippet === id) {
-      setExpandedSnippet(null);
-    } else {
-      setExpandedSnippet(id);
-    }
+    setExpandedSnippet(prev => prev === id ? null : id);
   };
 
+  // Format date for display
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
-  const clearSearch = () => {
+  // Clear all filters
+  const clearFilters = () => {
     setSearchTerm('');
+    setSelectedTech('All Technologies');
+    setSelectedLanguage('All Languages');
+    setSortConfig({ key: 'created_at', direction: 'descending' });
   };
 
+  // Handle sort requests
   const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getUniqueTechnologies = () => {
-    const techs = snippets.map(snippet => snippet.technology);
-    return ['All Technologies', ...new Set(techs)];
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'ascending' 
+        ? 'descending' 
+        : 'ascending'
+    }));
   };
 
   if (loading) {
@@ -116,160 +143,217 @@ const SnippetsPage = () => {
   }
 
   if (error) {
-    return <div className="error-message">Error: {error}</div>;
+    return (
+      <div className="error-message">
+        <p>Error loading snippets:</p>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Try Again</button>
+      </div>
+    );
   }
 
   return (
     <>
-    <HeaderWithNavbar/>
-    <div className="snippets-container">
-      <header className="snippets-header">
-        <h1>Code Snippets</h1>
-        <p>Handy code examples for various technologies</p>
-        
-        <div className="filters-container">
-          {/* Search Bar */}
-          <div className="search-container-code">
-            <div className="search-bar-code">
-              <FiSearch className="search-icon-code" />
-              <input
-                type="text"
-                placeholder="Search snippets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input-code"
-                
-              />
-              {searchTerm && (
-                <button onClick={clearSearch} className="clear-search-code">
-                  <FiX />
-                </button>
+      <HeaderWithNavbar />
+      <div className="snippets-container">
+        <header className="snippets-header">
+          <h1>Code Snippets</h1>
+          <p className="subtitle">Quick reference for common coding patterns</p>
+          
+          <div className="filters-container">
+            {/* Search Bar */}
+            <div className="search-container">
+              <div className="search-bar">
+                <FiSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by title, description, or tags..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                {searchTerm && (
+                  <button onClick={() => setSearchTerm('')} className="clear-search">
+                    <FiX />
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Technology Filter Dropdown */}
+            <div className="filter-dropdown">
+              <button 
+                className={`dropdown-button ${selectedTech !== 'All Technologies' ? 'active-filter' : ''}`}
+                onClick={() => setIsTechDropdownOpen(!isTechDropdownOpen)}
+              >
+                <FiFilter className="filter-icon" />
+                {selectedTech}
+                {isTechDropdownOpen ? <FiChevronUp /> : <FiChevronDown />}
+              </button>
+              {isTechDropdownOpen && (
+                <div className="dropdown-menu">
+                  {technologies.map((tech, index) => (
+                    <button
+                      key={`tech-${index}`}
+                      className={`dropdown-item ${tech === selectedTech ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedTech(tech);
+                        setIsTechDropdownOpen(false);
+                      }}
+                    >
+                      {tech}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
           
-          {/* Technology Dropdown */}
-          <div className="tech-dropdown">
-            <button 
-              className="dropdown-button"
-              onClick={() => setIsTechDropdownOpen(!isTechDropdownOpen)}
-            >
-              {selectedTech}
-              {isTechDropdownOpen ? <FiChevronUp /> : <FiChevronDown />}
-            </button>
-            {isTechDropdownOpen && (
-              <div className="dropdown-menu">
-                {getUniqueTechnologies().map((tech, index) => (
-                  <button
-                    key={index}
-                    className={`dropdown-item ${tech === selectedTech ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedTech(tech);
-                      setIsTechDropdownOpen(false);
-                    }}
-                  >
-                    {tech}
+          {/* Active filters indicator */}
+          {(selectedTech !== 'All Technologies' || selectedLanguage !== 'All Languages' || searchTerm) && (
+            <div className="active-filters">
+              <span>Active filters:</span>
+              {selectedTech !== 'All Technologies' && (
+                <span className="filter-tag">
+                  Technology: {selectedTech}
+                  <button onClick={() => setSelectedTech('All Technologies')} className="remove-filter">
+                    <FiX />
                   </button>
-                ))}
-              </div>
+                </span>
+              )}
+              {selectedLanguage !== 'All Languages' && (
+                <span className="filter-tag">
+                  Language: {selectedLanguage}
+                  <button onClick={() => setSelectedLanguage('All Languages')} className="remove-filter">
+                    <FiX />
+                  </button>
+                </span>
+              )}
+              {searchTerm && (
+                <span className="filter-tag">
+                  Search: "{searchTerm}"
+                  <button onClick={() => setSearchTerm('')} className="remove-filter">
+                    <FiX />
+                  </button>
+                </span>
+              )}
+              <button onClick={clearFilters} className="clear-all-filters">
+                Clear all
+              </button>
+            </div>
+          )}
+        </header>
+
+        {/* Sorting Controls */}
+        <div className="sorting-controls">
+          <span className="sort-label">Sort by:</span>
+          <button 
+            className={`sort-button ${sortConfig.key === 'title' ? 'active' : ''}`}
+            onClick={() => requestSort('title')}
+          >
+            Title {sortConfig.key === 'title' && (
+              sortConfig.direction === 'ascending' ? '↑' : '↓'
             )}
-          </div>
+          </button>
+          <button 
+            className={`sort-button ${sortConfig.key === 'technology' ? 'active' : ''}`}
+            onClick={() => requestSort('technology')}
+          >
+            Technology {sortConfig.key === 'technology' && (
+              sortConfig.direction === 'ascending' ? '↑' : '↓'
+            )}
+          </button>
+          <button 
+            className={`sort-button ${sortConfig.key === 'language' ? 'active' : ''}`}
+            onClick={() => requestSort('language')}
+          >
+            Language {sortConfig.key === 'language' && (
+              sortConfig.direction === 'ascending' ? '↑' : '↓'
+            )}
+          </button>
+          <button 
+            className={`sort-button ${sortConfig.key === 'created_at' ? 'active' : ''}`}
+            onClick={() => requestSort('created_at')}
+          >
+            <FiClock /> Date {sortConfig.key === 'created_at' && (
+              sortConfig.direction === 'ascending' ? '↑' : '↓'
+            )}
+          </button>
         </div>
-        
-        {searchTerm && (
-          <div className="search-results-count">
-            {filteredSnippets.length} {filteredSnippets.length === 1 ? 'result' : 'results'} found
-          </div>
-        )}
-      </header>
 
-      {/* Sorting Controls */}
-      <div className="sorting-controls">
-        <span>Sort by:</span>
-        <button 
-          className={`sort-button ${sortConfig.key === 'title' ? 'active' : ''}`}
-          onClick={() => requestSort('title')}
-        >
-          Title {sortConfig.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-        </button>
-        <button 
-          className={`sort-button ${sortConfig.key === 'created_at' ? 'active' : ''}`}
-          onClick={() => requestSort('created_at')}
-        >
-          Date {sortConfig.key === 'created_at' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-        </button>
-        <button 
-          className={`sort-button ${sortConfig.key === 'technology' ? 'active' : ''}`}
-          onClick={() => requestSort('technology')}
-        >
-          Technology {sortConfig.key === 'technology' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-        </button>
-      </div>
-
-      <main className="snippets-list">
-        {filteredSnippets.length > 0 ? (
-          filteredSnippets.map((snippet) => (
-            <article key={snippet.id} className={`snippet-item ${expandedSnippet === snippet.id ? 'expanded' : ''}`}>
-              <div 
-                className="snippet-summary" 
-                onClick={() => toggleSnippet(snippet.id)}
-                aria-expanded={expandedSnippet === snippet.id}
+        {/* Snippets List */}
+        <main className="snippets-list">
+          {filteredSnippets.length > 0 ? (
+            filteredSnippets.map((snippet) => (
+              <article 
+                key={snippet.id} 
+                className={`snippet-item ${expandedSnippet === snippet.id ? 'expanded' : ''}`}
               >
-                <div className="snippet-meta">
-                  <span className="snippet-tech">{snippet.technology}</span>
-                  <span className="snippet-date">{formatDate(snippet.created_at)}</span>
-                </div>
-                <h2 className="snippet-title">{snippet.title}</h2>
-              
-                <div className="snippet-tags">
-                  {snippet.tags.map((tag, index) => (
-                    <span key={index} className="tag">{tag}</span>
-                  ))}
-                </div>
-                <div className="snippet-language">Language: {snippet.language}</div>
-              </div>
-
-              {expandedSnippet === snippet.id && (
-                <div className="snippet-content">
-                  <div 
-                    className="content-html" 
-                    dangerouslySetInnerHTML={{ __html: snippet.description }} 
-                  />
-                  <div className="code-container">
-                    <SyntaxHighlighter
-                      language={snippet.language.toLowerCase()}
-                      style={atomDark}
-                      showLineNumbers={true}
-                      wrapLines={true}
-                    >
-                      {snippet.code}
-                    </SyntaxHighlighter>
+                <div 
+                  className="snippet-summary" 
+                  onClick={() => toggleSnippet(snippet.id)}
+                  aria-expanded={expandedSnippet === snippet.id}
+                >
+                  <div className="snippet-meta">
+                    <span className="snippet-tech-badge">
+                      {snippet.technology}
+                    </span>
+                    <span className="snippet-date">
+                      {formatDate(snippet.created_at)}
+                    </span>
+                  </div>
+                  <h2 className="snippet-title">{snippet.title}</h2>
+                  <p className="snippet-description">
+                    {snippet.description.replace(/<[^>]+>/g, '').substring(0, 100)}...
+                  </p>
+                
+                  <div className="snippet-footer">
+                    <div className="snippet-tags">
+                      {snippet.tags && snippet.tags.map((tag, index) => (
+                        <span key={index} className="tag">#{tag}</span>
+                      ))}
+                    </div>
+                    <span className="snippet-language">
+                      <FiCode /> {snippet.language}
+                    </span>
                   </div>
                 </div>
-              )}
-            </article>
-          ))
-        ) : (
-          <div className="no-results">
-            <p>No snippets found matching your criteria.</p>
-            <button 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedTech('All Technologies');
-              }} 
-              className="clear-filters-button"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
-      </main>
 
-      <footer className="snippets-footer">
-        <p>© {new Date().getFullYear()} CodeWithSathya. All rights reserved.</p>
-      </footer>
-    </div>
-    <Footer/>
+                {expandedSnippet === snippet.id && (
+                  <div className="snippet-content">
+                    <div 
+                      className="content-html" 
+                      dangerouslySetInnerHTML={{ __html: snippet.description }} 
+                    />
+                    <div className="code-container">
+                      <SyntaxHighlighter
+                        language={snippet.language.toLowerCase()}
+                        style={atomDark}
+                        showLineNumbers={true}
+                        wrapLines={true}
+                        lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
+                      >
+                        {snippet.code}
+                      </SyntaxHighlighter>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))
+          ) : (
+            <div className="no-results">
+              <p>No snippets found matching your criteria.</p>
+              <button 
+                onClick={clearFilters}
+                className="clear-filters-button"
+              >
+                Reset all filters
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
+      <Footer />
     </>
   );
 };
