@@ -1,0 +1,87 @@
+/* Common styles for both components */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  border: none;
+  background-color: #f8f9fa;
+}
+
+.app-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: darkslategrey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+}
+
+.text-link {
+  color: darkslategrey;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+  color: #1e4a4a;
+}
+
+/* Google Login specific */
+.google-btn {
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #4285F4;
+  color: #4285F4;
+  transition: all 0.3s;
+}
+
+.google-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #3367d6;
+  color: #3367d6;
+}
+
+/* Registration specific */
+.register-btn {
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 500;
+  background-color: darkslategrey;
+  border: none;
+  transition: all 0.3s;
+}
+
+.register-btn:hover {
+  background-color: #1e4a4a;
+}
+
+.form-control {
+  border-radius: 8px;
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: darkslategrey;
+  box-shadow: 0 0 0 0.25rem rgba(47, 79, 79, 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .auth-card {
+    margin: 20px;
+    padding: 20px !important;
+  }
+}
