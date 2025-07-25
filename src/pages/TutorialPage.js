@@ -69,15 +69,16 @@ const TutorialPage = () => {
     const fetchData = async () => {
       try {
         // Fetch the specific tutorial content
-        const tutorialResponse = await fetch(`https://codewithsathya.pythonanywhere.com/topics/${slug}`);
+        const tutorialResponse = await fetch(`https://codewithsathya.pythonanywhere.com/api/topics/${slug}`);
         if (!tutorialResponse.ok) {
           throw new Error('Failed to fetch tutorial');
         }
         const tutorialData = await tutorialResponse.json();
         setTutorialData(tutorialData);
+        console.log(tutorialData)
 
         // Fetch all topics for this tutorial
-        const topicsResponse = await fetch(`https://codewithsathya.pythonanywhere.com/tutorials/${tutorialData.tutorial}/`);
+        const topicsResponse = await fetch(`https://codewithsathya.pythonanywhere.com/api/tutorials/${tutorialData.tutorial}/`);
         if (!topicsResponse.ok) {
           throw new Error('Failed to fetch topics list');
         }

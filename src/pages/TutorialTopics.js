@@ -29,7 +29,7 @@ const TutorialTopics = () => {
   useEffect(() => {
     const fetchTopics = async () => {
       try {
-        const response = await axios.get(`https://codewithsathya.pythonanywhere.com/tutorials/${slug}/`);
+        const response = await axios.get(`https://codewithsathya.pythonanywhere.com/api/tutorials/${slug}/`);
         const sortedTopics = (response.data.topics || []).sort((a, b) => 
           new Date(b.updated_at) - new Date(a.updated_at)
         );

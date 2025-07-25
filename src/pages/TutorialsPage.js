@@ -35,13 +35,13 @@ const TutorialsPage = () => {
     const fetchTutorials = async () => {
       try {
         const response = await fetch(
-          "https://codewithsathya.pythonanywhere.com/tutorials/"
+          "https://codewithsathya.pythonanywhere.com/api/tutorials/"
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        setTutorials(data);
+        setTutorials(data.results);
         setFilteredTutorials(data);
       } catch (err) {
         setError(err.message);

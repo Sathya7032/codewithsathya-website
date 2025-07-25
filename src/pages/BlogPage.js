@@ -18,13 +18,13 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('https://codewithsathya.pythonanywhere.com/blogs/');
+        const response = await fetch('https://codewithsathya.pythonanywhere.com/api/blogs/');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
         // Sort blogs in reverse order by ID (newest first)
-        const sortedBlogs = [...data].sort((a, b) => b.id - a.id);
+        const sortedBlogs = [...data.results].sort((a, b) => b.id - a.id);
         setBlogs(sortedBlogs);
         setFilteredBlogs(sortedBlogs);
       } catch (err) {

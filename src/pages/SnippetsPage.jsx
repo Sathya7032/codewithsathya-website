@@ -24,10 +24,10 @@ const SnippetsPage = () => {
   useEffect(() => {
     const fetchSnippets = async () => {
       try {
-        const response = await fetch('https://codewithsathya.pythonanywhere.com/snippets/');
+        const response = await fetch('https://codewithsathya.pythonanywhere.com/api/snippets/');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        setSnippets(data);
+        setSnippets(data.results);
       } catch (err) {
         setError(err.message);
       } finally {

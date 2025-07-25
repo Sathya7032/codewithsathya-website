@@ -15,7 +15,7 @@ const BlogViewPage = () => {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`https://codewithsathya.pythonanywhere.com/blogs/${slug}`);
+        const response = await axios.get(`https://codewithsathya.pythonanywhere.com/api/blogs/${slug}`);
         setBlog(response.data);
         setLoading(false);
       } catch (err) {

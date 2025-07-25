@@ -22,12 +22,13 @@ const Technologies = () => {
   useEffect(() => {
     const fetchTechnologies = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/technologies/`);
+        const response = await fetch(`${API_BASE_URL}/api/technologies/`);
         if (!response.ok) {
           throw new Error('Failed to fetch technologies');
         }
         const data = await response.json();
-        setTechnologies(data);
+        setTechnologies(data.results);
+        console.log(data)
       } catch (err) {
         setError(err.message);
       } finally {
