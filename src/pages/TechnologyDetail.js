@@ -15,7 +15,7 @@ const TechnologyDetail = () => {
   useEffect(() => {
     const fetchTechnology = async () => {
       try {
-        const response = await fetch(`https://codewithsathya.pythonanywhere.com/technologies/${slug}/`);
+        const response = await fetch(`https://codewithsathya.pythonanywhere.com/api/technologies/${slug}/`);
         if (!response.ok) {
           throw new Error('Failed to fetch technology details');
         }
@@ -198,9 +198,7 @@ const TechnologyDetail = () => {
                       <span className="difficulty">{tutorial.difficulty}</span>
                       <span className="date">{formatDate(tutorial.published_date)}</span>
                     </div>
-                    <p className="item-excerpt">
-                      {tutorial.content.substring(0, 150)}...
-                    </p>
+                    
                   </div>
                 </Link>
               ))
