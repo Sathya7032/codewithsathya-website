@@ -119,11 +119,6 @@ const [user, setUser] = useState(null);
                 <span>Code Snippets</span>
               </Nav.Link>
               
-              <Nav.Link href="/tech-updates" className="mx-2 d-flex align-items-center">
-                <Megaphone className="me-1" />
-                <span>Tech Updates</span>
-              </Nav.Link>
-              
               {isAuthorized ? (
                 <>
                   <div 
