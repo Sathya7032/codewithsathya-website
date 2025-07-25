@@ -18,7 +18,7 @@ import PrivateRoute from "./auth/PrivateRoute";
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="823001267558-54rkovq5iimg6cn29m6gh6dr710se5mt.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="323681600583-h8ta18gvt22h51qq9i48tslhmt7hds5v.apps.googleusercontent.com">
       <AuthProvider>
         <BrowserRouter>
           <Routes>
