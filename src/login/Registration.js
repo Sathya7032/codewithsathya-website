@@ -47,7 +47,7 @@ const Registration = () => {
       setLoading(true);
       setApiError('');
       
-      const response = await axios.post('http://localhost:8000/api/users/', formData);
+      const response = await axios.post('https://codewithsathya.pythonanywhere.com/api/users/', formData);
       
       if (response.status === 201) {
         navigate('/login', { state: { registrationSuccess: true } });

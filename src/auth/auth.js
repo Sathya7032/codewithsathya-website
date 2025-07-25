@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/auth/user/", {
+      const response = await axios.get("https://codewithsathya.pythonanywhere.com/api/auth/user/", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
+      const res = await axios.post("https://codewithsathya.pythonanywhere.com/api/token/refresh/", {
         refresh: refreshToken,
       });
 
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }) => {
     console.log("🔍 Validating Google token with backend...");
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/api/google/validate_token/",
+        "https://codewithsathya.pythonanywhere.com/api/google/validate_token/",
         {
           access_token: googleAccessToken,
         }
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
 
         // ❌ This is incorrect (GET with token in body). You should use POST!
         res = await axios.post(
-          "http://127.0.0.1:8000/api/google/validate_token/",
+          "https://codewithsathya.pythonanywhere.com/api/google/validate_token/",
           {
             access_token: credentials.google_token,
           }
@@ -168,7 +168,7 @@ export const AuthProvider = ({ children }) => {
         console.log("user data ", res.data.user);
       } else {
         console.log("📝 Logging in with credentials:", credentials);
-        res = await axios.post("http://127.0.0.1:8000/api/token/", credentials);
+        res = await axios.post("https://codewithsathya.pythonanywhere.com/api/token/", credentials);
       }
 
       if (res.data.access) {

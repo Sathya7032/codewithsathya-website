@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 let userSetter = null; // External setter to update user state
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: 'https://codewithsathya.pythonanywhere.com/api/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +43,7 @@ const refreshToken = async () => {
   if (!refresh) return null;
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', {
+    const response = await axios.post('https://codewithsathya.pythonanywhere.com/api/token/refresh/', {
       refresh,
     });
 
