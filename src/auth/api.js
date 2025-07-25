@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ACCESS_TOKEN } from './token';
 
 // Set up the base URL - use environment variable if available, otherwise fall back to local Django server
-const apiUrl = "http://127.0.0.1:8000";
+const apiUrl = "https://codewithsathya.pythonanywhere.com";
 
 const api = axios.create({
     baseURL: apiUrl,

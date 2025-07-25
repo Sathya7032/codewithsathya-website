@@ -23,7 +23,7 @@ const [user, setUser] = useState(null);
   }
 
   try {
-    const response = await axios.get("http://127.0.0.1:8000/api/auth/user/", {
+    const response = await axios.get("https://codewithsathya.pythonanywhere.com/api/auth/user/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
