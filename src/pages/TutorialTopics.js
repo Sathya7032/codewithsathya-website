@@ -16,7 +16,7 @@ import './topics.css';
 import { Link, useParams } from 'react-router-dom';
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
-import { FlaskFlorence, Search } from 'react-bootstrap-icons';
+import { Search } from 'react-bootstrap-icons';
 
 const TutorialTopics = () => {
   const [topics, setTopics] = useState([]);

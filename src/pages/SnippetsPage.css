@@ -351,3 +351,28 @@
     padding: 15px;
   }
 }
+
+.tech-list-section {
+  margin-top: 1.5rem;
+}
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.tech-button {
+  padding: 0.5rem 0.75rem;
+  background: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tech-button.selected {
+  background: #007bff;
+  color: white;
+}

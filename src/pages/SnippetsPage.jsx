@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { FiSearch, FiX, FiChevronDown, FiChevronUp, FiFilter, FiClock, FiCode } from 'react-icons/fi';
+import {
+  FiSearch, FiX, FiChevronDown, FiChevronUp,
+  FiFilter, FiClock, FiCode
+} from 'react-icons/fi';
 import './SnippetsPage.css';
 import HeaderWithNavbar from '../components/HeaderWithNavbar';
 import Footer from '../components/Footer';
@@ -20,7 +23,6 @@ const SnippetsPage = () => {
   const [selectedTech, setSelectedTech] = useState('All Technologies');
   const [selectedLanguage, setSelectedLanguage] = useState('All Languages');
 
-  // Fetch snippets on component mount
   useEffect(() => {
     const fetchSnippets = async () => {
       try {
@@ -34,37 +36,27 @@ const SnippetsPage = () => {
         setLoading(false);
       }
     };
-
     fetchSnippets();
   }, []);
 
-  // Get unique technologies for filter dropdown
   const technologies = useMemo(() => {
     const techs = snippets.map(snippet => snippet.technology);
     return ['All Technologies', ...new Set(techs)].filter(Boolean);
   }, [snippets]);
 
-  // Get unique languages for filter dropdown
   const languages = useMemo(() => {
     const langs = snippets.map(snippet => snippet.language);
     return ['All Languages', ...new Set(langs)].filter(Boolean);
   }, [snippets]);
 
-  // Filter and sort snippets based on current filters and sort config
   const filteredSnippets = useMemo(() => {
     let result = [...snippets];
-    
-    // Apply technology filter
     if (selectedTech !== 'All Technologies') {
       result = result.filter(snippet => snippet.technology === selectedTech);
     }
-    
-    // Apply language filter
     if (selectedLanguage !== 'All Languages') {
       result = result.filter(snippet => snippet.language === selectedLanguage);
     }
-    
-    // Apply search filter
     if (searchTerm.trim() !== '') {
       const term = searchTerm.toLowerCase();
       result = result.filter(snippet =>
@@ -73,49 +65,35 @@ const SnippetsPage = () => {
         (snippet.tags && snippet.tags.some(tag => tag.toLowerCase().includes(term)))
       );
     }
-    
-    // Apply sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
-        
-        // Handle date comparison
         if (sortConfig.key === 'created_at') {
-          return sortConfig.direction === 'ascending' 
+          return sortConfig.direction === 'ascending'
             ? new Date(aValue) - new Date(bValue)
             : new Date(bValue) - new Date(aValue);
         }
-        
-        // Handle string comparison
-        if (aValue < bValue) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
+        if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
         return 0;
       });
     }
-    
     return result;
   }, [snippets, searchTerm, sortConfig, selectedTech, selectedLanguage]);
 
-  // Toggle snippet expansion
   const toggleSnippet = (id) => {
     setExpandedSnippet(prev => prev === id ? null : id);
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedTech('All Technologies');
@@ -123,12 +101,11 @@ const SnippetsPage = () => {
     setSortConfig({ key: 'created_at', direction: 'descending' });
   };
 
-  // Handle sort requests
   const requestSort = (key) => {
     setSortConfig(prev => ({
       key,
-      direction: prev.key === key && prev.direction === 'ascending' 
-        ? 'descending' 
+      direction: prev.key === key && prev.direction === 'ascending'
+        ? 'descending'
         : 'ascending'
     }));
   };
@@ -159,9 +136,26 @@ const SnippetsPage = () => {
         <header className="snippets-header">
           <h1>Code Snippets</h1>
           <p className="subtitle">Quick reference for common coding patterns</p>
-          
+
+          {/* Technologies Used Section */}
+          <div className="tech-list-section">
+            <h3>Technologies Used:</h3>
+            <ul className="tech-list">
+              {technologies.slice(1).map((tech, idx) => (
+                <li key={idx}>
+                  <button
+                    className={`tech-button ${tech === selectedTech ? 'selected' : ''}`}
+                    onClick={() => setSelectedTech(tech)}
+                  >
+                    {tech}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Search + Filter Controls */}
           <div className="filters-container">
-            {/* Search Bar */}
             <div className="search-container">
               <div className="search-bar">
                 <FiSearch className="search-icon" />
@@ -179,10 +173,10 @@ const SnippetsPage = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Technology Filter Dropdown */}
             <div className="filter-dropdown">
-              <button 
+              <button
                 className={`dropdown-button ${selectedTech !== 'All Technologies' ? 'active-filter' : ''}`}
                 onClick={() => setIsTechDropdownOpen(!isTechDropdownOpen)}
               >
@@ -208,8 +202,8 @@ const SnippetsPage = () => {
               )}
             </div>
           </div>
-          
-          {/* Active filters indicator */}
+
+          {/* Active Filters */}
           {(selectedTech !== 'All Technologies' || selectedLanguage !== 'All Languages' || searchTerm) && (
             <div className="active-filters">
               <span>Active filters:</span>
@@ -244,40 +238,20 @@ const SnippetsPage = () => {
           )}
         </header>
 
-        {/* Sorting Controls */}
+        {/* Sort Controls */}
         <div className="sorting-controls">
           <span className="sort-label">Sort by:</span>
-          <button 
-            className={`sort-button ${sortConfig.key === 'title' ? 'active' : ''}`}
-            onClick={() => requestSort('title')}
-          >
-            Title {sortConfig.key === 'title' && (
-              sortConfig.direction === 'ascending' ? '↑' : '↓'
-            )}
+          <button className={`sort-button ${sortConfig.key === 'title' ? 'active' : ''}`} onClick={() => requestSort('title')}>
+            Title {sortConfig.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
           </button>
-          <button 
-            className={`sort-button ${sortConfig.key === 'technology' ? 'active' : ''}`}
-            onClick={() => requestSort('technology')}
-          >
-            Technology {sortConfig.key === 'technology' && (
-              sortConfig.direction === 'ascending' ? '↑' : '↓'
-            )}
+          <button className={`sort-button ${sortConfig.key === 'technology' ? 'active' : ''}`} onClick={() => requestSort('technology')}>
+            Technology {sortConfig.key === 'technology' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
           </button>
-          <button 
-            className={`sort-button ${sortConfig.key === 'language' ? 'active' : ''}`}
-            onClick={() => requestSort('language')}
-          >
-            Language {sortConfig.key === 'language' && (
-              sortConfig.direction === 'ascending' ? '↑' : '↓'
-            )}
+          <button className={`sort-button ${sortConfig.key === 'language' ? 'active' : ''}`} onClick={() => requestSort('language')}>
+            Language {sortConfig.key === 'language' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
           </button>
-          <button 
-            className={`sort-button ${sortConfig.key === 'created_at' ? 'active' : ''}`}
-            onClick={() => requestSort('created_at')}
-          >
-            <FiClock /> Date {sortConfig.key === 'created_at' && (
-              sortConfig.direction === 'ascending' ? '↑' : '↓'
-            )}
+          <button className={`sort-button ${sortConfig.key === 'created_at' ? 'active' : ''}`} onClick={() => requestSort('created_at')}>
+            <FiClock /> Date {sortConfig.key === 'created_at' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
           </button>
         </div>
 
@@ -285,28 +259,16 @@ const SnippetsPage = () => {
         <main className="snippets-list">
           {filteredSnippets.length > 0 ? (
             filteredSnippets.map((snippet) => (
-              <article 
-                key={snippet.id} 
-                className={`snippet-item ${expandedSnippet === snippet.id ? 'expanded' : ''}`}
-              >
-                <div 
-                  className="snippet-summary" 
-                  onClick={() => toggleSnippet(snippet.id)}
-                  aria-expanded={expandedSnippet === snippet.id}
-                >
+              <article key={snippet.id} className={`snippet-item ${expandedSnippet === snippet.id ? 'expanded' : ''}`}>
+                <div className="snippet-summary" onClick={() => toggleSnippet(snippet.id)} aria-expanded={expandedSnippet === snippet.id}>
                   <div className="snippet-meta">
-                    <span className="snippet-tech-badge">
-                      {snippet.technology}
-                    </span>
-                    <span className="snippet-date">
-                      {formatDate(snippet.created_at)}
-                    </span>
+                    <span className="snippet-tech-badge">{snippet.technology}</span>
+                    <span className="snippet-date">{formatDate(snippet.created_at)}</span>
                   </div>
                   <h2 className="snippet-title">{snippet.title}</h2>
                   <p className="snippet-description">
                     {snippet.description.replace(/<[^>]+>/g, '').substring(0, 100)}...
                   </p>
-                
                   <div className="snippet-footer">
                     <div className="snippet-tags">
                       {snippet.tags && snippet.tags.map((tag, index) => (
@@ -321,10 +283,7 @@ const SnippetsPage = () => {
 
                 {expandedSnippet === snippet.id && (
                   <div className="snippet-content">
-                    <div 
-                      className="content-html" 
-                      dangerouslySetInnerHTML={{ __html: snippet.description }} 
-                    />
+                    <div className="content-html" dangerouslySetInnerHTML={{ __html: snippet.description }} />
                     <div className="code-container">
                       <SyntaxHighlighter
                         language={snippet.language.toLowerCase()}
@@ -343,12 +302,7 @@ const SnippetsPage = () => {
           ) : (
             <div className="no-results">
               <p>No snippets found matching your criteria.</p>
-              <button 
-                onClick={clearFilters}
-                className="clear-filters-button"
-              >
-                Reset all filters
-              </button>
+              <button onClick={clearFilters} className="clear-filters-button">Reset all filters</button>
             </div>
           )}
         </main>
