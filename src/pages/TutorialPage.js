@@ -11,17 +11,19 @@ import {
   Spinner,
   Tabs,
   Tab,
+  Modal,
+  ProgressBar,
+  Alert,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookmark,
   faCheckCircle,
   faClock,
+  faTrophy,
+  faLightbulb,
 } from "@fortawesome/free-solid-svg-icons";
 import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import { html } from "@codemirror/lang-html";
-import { python } from "@codemirror/lang-python";
 import { json } from "@codemirror/lang-json";
 import "./TutorialPage.css";
 import HeaderWithNavbar from "../components/HeaderWithNavbar";
@@ -37,6 +39,122 @@ function getLanguageFromTags(tags) {
   return 'text'; // default fallback
 }
 
+const QuizModal = ({ show, onHide, questions }) => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [score, setScore] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const handleAnswerSelect = (answer) => {
+    setSelectedAnswer(answer);
+    if (answer.is_correct) {
+      setScore(score + 1);
+    }
+    setShowExplanation(true);
+  };
+
+  const handleNextQuestion = () => {
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setQuizCompleted(true);
+    }
+  };
+
+  const handleRestartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setScore(0);
+    setQuizCompleted(false);
+  };
+
+  const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  return (
+    <Modal show={show} onHide={onHide} size="lg" centered>
+      <Modal.Header closeButton>
+        <Modal.Title>
+          <FontAwesomeIcon icon={faTrophy} className="me-2 text-warning" />
+          Test Your Knowledge
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {!quizCompleted ? (
+          <>
+            <div className="d-flex justify-content-between mb-3">
+              <span className="text-muted">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </span>
+              <Badge bg="info">
+                Difficulty: {currentQuestion.difficulty === 'E' ? 'Easy' : 
+                           currentQuestion.difficulty === 'M' ? 'Medium' : 'Hard'}
+              </Badge>
+            </div>
+            
+            <ProgressBar now={progressPercentage} className="mb-4" />
+            
+            <h5 className="mb-4">{currentQuestion.text}</h5>
+            
+            <div className="quiz-options">
+              {currentQuestion.answers.map((answer) => (
+                <Button
+                  key={answer.id}
+                  variant="outline-primary"
+                  className={`d-block w-100 text-start mb-2 ${selectedAnswer && answer.is_correct ? 'bg-success text-white' : ''} ${
+                    selectedAnswer && answer.id === selectedAnswer.id && !answer.is_correct ? 'bg-danger text-white' : ''
+                  }`}
+                  onClick={() => !showExplanation && handleAnswerSelect(answer)}
+                  disabled={showExplanation}
+                >
+                  {answer.text}
+                  {selectedAnswer && answer.is_correct && (
+                    <FontAwesomeIcon icon={faCheckCircle} className="ms-2" />
+                  )}
+                </Button>
+              ))}
+            </div>
+            
+            {showExplanation && (
+              <Alert variant="info" className="mt-3">
+                <FontAwesomeIcon icon={faLightbulb} className="me-2" />
+                <div dangerouslySetInnerHTML={{ __html: currentQuestion.explanation }} />
+              </Alert>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-4">
+            <FontAwesomeIcon icon={faTrophy} size="4x" className="text-warning mb-3" />
+            <h4>Quiz Completed!</h4>
+            <p className="lead">
+              Your score: {score} out of {questions.length}
+            </p>
+            <p>
+              {score === questions.length ? "Perfect! You're a Java expert!" :
+               score >= questions.length / 2 ? "Good job! Keep learning!" :
+               "Keep practicing! You'll get better!"}
+            </p>
+            <Button variant="primary" onClick={handleRestartQuiz}>
+              Take Quiz Again
+            </Button>
+          </div>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        {!quizCompleted && showExplanation && (
+          <Button variant="primary" onClick={handleNextQuestion}>
+            {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+          </Button>
+        )}
+      </Modal.Footer>
+    </Modal>
+  );
+};
 
 const TutorialPage = () => {
   const { slug } = useParams();
@@ -46,6 +164,7 @@ const TutorialPage = () => {
   const [error, setError] = useState(null);
   const [activeKey, setActiveKey] = useState("0");
   const [activeTab, setActiveTab] = useState("content");
+  const [showQuiz, setShowQuiz] = useState(false);
 
   // Function to process HTML content and make images responsive
   const createMarkup = (htmlContent) => {
@@ -71,11 +190,6 @@ const TutorialPage = () => {
 
     return { __html: processedHtml };
   };
-
-  
-
-  // Function to determine CodeMirror language
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,8 +223,6 @@ const TutorialPage = () => {
 
     fetchData();
   }, [slug]);
-
-  
 
   if (loading) {
     return (
@@ -183,6 +295,19 @@ const TutorialPage = () => {
                   </span>
                 </div>
 
+                {tutorialData.questions && tutorialData.questions.length > 0 && (
+                  <div className="mb-4">
+                    <Button 
+                      variant="warning" 
+                      onClick={() => setShowQuiz(true)}
+                      className="d-flex align-items-center"
+                    >
+                      <FontAwesomeIcon icon={faTrophy} className="me-2" />
+                      Take Quiz ({tutorialData.questions.length} Questions)
+                    </Button>
+                  </div>
+                )}
+
                 <Tabs
                   activeKey={activeTab}
                   onSelect={(k) => setActiveTab(k)}
@@ -195,13 +320,7 @@ const TutorialPage = () => {
                         tutorialData.content
                       )}
                     />
-                  </Tab>
-                  <Tab
-                    eventKey="code"
-                    title="Code"
-                    disabled={!tutorialData.code_snippet}
-                  >
-                    {tutorialData.code_snippet && (
+                     {tutorialData.code_snippet && (
                       <SyntaxHighlighter
                         language={language}
                         style={atomDark}
@@ -218,16 +337,8 @@ const TutorialPage = () => {
                       </SyntaxHighlighter>
                     )}
                   </Tab>
-                  <Tab eventKey="json" title="JSON">
-                    <CodeMirror
-                      value={JSON.stringify(tutorialData, null, 2)}
-                      extensions={[json()]}
-                      readOnly={true}
-                      theme="light"
-                      height="auto"
-                      className="code-mirror-container"
-                    />
-                  </Tab>
+                 
+                
                 </Tabs>
 
                 {tutorialData.video_url && (
@@ -306,6 +417,14 @@ const TutorialPage = () => {
         </Row>
       </Container>
       <Footer />
+
+      {tutorialData.questions && tutorialData.questions.length > 0 && (
+        <QuizModal 
+          show={showQuiz} 
+          onHide={() => setShowQuiz(false)} 
+          questions={tutorialData.questions} 
+        />
+      )}
     </>
   );
 };
