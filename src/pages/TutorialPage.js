@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   Container,
   Row,
@@ -10,18 +10,33 @@ import {
   Accordion,
   Spinner,
   Tabs,
-  Tab
-} from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBookmark, faCheckCircle, faClock } from '@fortawesome/free-solid-svg-icons';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { html } from '@codemirror/lang-html';
-import { python } from '@codemirror/lang-python';
-import { json } from '@codemirror/lang-json';
-import './TutorialPage.css';
-import HeaderWithNavbar from '../components/HeaderWithNavbar';
-import Footer from '../components/Footer';
+  Tab,
+} from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBookmark,
+  faCheckCircle,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { python } from "@codemirror/lang-python";
+import { json } from "@codemirror/lang-json";
+import "./TutorialPage.css";
+import HeaderWithNavbar from "../components/HeaderWithNavbar";
+import Footer from "../components/Footer";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+
+function getLanguageFromTags(tags) {
+  if (!tags || !Array.isArray(tags)) return 'text';
+  if (tags.includes('core-java') || tags.includes('java')) return 'java';
+  if (tags.includes('javascript')) return 'javascript';
+  if (tags.includes('python')) return 'python';
+  return 'text'; // default fallback
+}
+
 
 const TutorialPage = () => {
   const { slug } = useParams();
@@ -29,62 +44,62 @@ const TutorialPage = () => {
   const [topicsList, setTopicsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeKey, setActiveKey] = useState('0');
-  const [activeTab, setActiveTab] = useState('content');
+  const [activeKey, setActiveKey] = useState("0");
+  const [activeTab, setActiveTab] = useState("content");
 
   // Function to process HTML content and make images responsive
   const createMarkup = (htmlContent) => {
-    if (!htmlContent) return { __html: '' };
-    
+    if (!htmlContent) return { __html: "" };
+
     // Process images to make them responsive
     const processedHtml = htmlContent
       // Remove fixed width/height from images but keep aspect ratio
-      .replace(/<img([^>]*)style="[^"]*aspect-ratio:([^;]+);[^"]*"/g, 
-        '<img$1style="max-width:100%;height:auto;"')
+      .replace(
+        /<img([^>]*)style="[^"]*aspect-ratio:([^;]+);[^"]*"/g,
+        '<img$1style="max-width:100%;height:auto;"'
+      )
       // Remove fixed width/height attributes
-      .replace(/<img([^>]*)width="[^"]*"/g, '<img$1')
-      .replace(/<img([^>]*)height="[^"]*"/g, '<img$1')
+      .replace(/<img([^>]*)width="[^"]*"/g, "<img$1")
+      .replace(/<img([^>]*)height="[^"]*"/g, "<img$1")
       // Make figure elements responsive
-      .replace(/<figure class="image image_resized" style="width:[^;]+;"/g, 
-        '<figure class="image-container" style="max-width:100%;"')
+      .replace(
+        /<figure class="image image_resized" style="width:[^;]+;"/g,
+        '<figure class="image-container" style="max-width:100%;"'
+      )
       // Add bootstrap responsive image class
       .replace(/<img([^>]*)>/g, '<img class="img-fluid"$1>');
 
     return { __html: processedHtml };
   };
 
+  
+
   // Function to determine CodeMirror language
-  const getCodeMirrorLanguage = (codeSnippet) => {
-    if (!codeSnippet) return null;
-    
-    if (codeSnippet.includes('function') || codeSnippet.includes('const')) return javascript();
-    if (codeSnippet.includes('<html') || codeSnippet.includes('<div')) return html();
-    if (codeSnippet.includes('def ') || codeSnippet.includes('import ')) return python();
-    if (codeSnippet.trim().startsWith('{') || codeSnippet.trim().startsWith('[')) return json();
-    
-    return null;
-  };
+  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch the specific tutorial content
-        const tutorialResponse = await fetch(`https://codewithsathya.pythonanywhere.com/api/topics/${slug}`);
+        const tutorialResponse = await fetch(
+          `https://codewithsathya.pythonanywhere.com/api/topics/${slug}`
+        );
         if (!tutorialResponse.ok) {
-          throw new Error('Failed to fetch tutorial');
+          throw new Error("Failed to fetch tutorial");
         }
         const tutorialData = await tutorialResponse.json();
         setTutorialData(tutorialData);
-        console.log(tutorialData)
+        console.log(tutorialData);
 
         // Fetch all topics for this tutorial
-        const topicsResponse = await fetch(`https://codewithsathya.pythonanywhere.com/api/tutorials/${tutorialData.tutorial}/`);
+        const topicsResponse = await fetch(
+          `https://codewithsathya.pythonanywhere.com/api/tutorials/${tutorialData.tutorial}/`
+        );
         if (!topicsResponse.ok) {
-          throw new Error('Failed to fetch topics list');
+          throw new Error("Failed to fetch topics list");
         }
         const topicsData = await topicsResponse.json();
         setTopicsList(topicsData.topics || []);
-
       } catch (err) {
         setError(err.message);
       } finally {
@@ -94,6 +109,8 @@ const TutorialPage = () => {
 
     fetchData();
   }, [slug]);
+
+  
 
   if (loading) {
     return (
@@ -123,6 +140,7 @@ const TutorialPage = () => {
     );
   }
 
+  const language = getLanguageFromTags(tutorialData.tags);
   return (
     <>
       <HeaderWithNavbar />
@@ -141,7 +159,11 @@ const TutorialPage = () => {
 
                 <div className="mb-4">
                   {tutorialData.tags.map((tag, index) => (
-                    <Badge key={index} bg="secondary" className="me-2 tag-badge">
+                    <Badge
+                      key={index}
+                      bg="secondary"
+                      className="me-2 tag-badge"
+                    >
                       {tag}
                     </Badge>
                   ))}
@@ -153,8 +175,11 @@ const TutorialPage = () => {
                     {new Date(tutorialData.created_at).toLocaleDateString()}
                   </span>
                   <span>
-                    <FontAwesomeIcon icon={faCheckCircle} className="me-1 text-success" />
-                    {tutorialData.is_free ? 'Free' : 'Premium'}
+                    <FontAwesomeIcon
+                      icon={faCheckCircle}
+                      className="me-1 text-success"
+                    />
+                    {tutorialData.is_free ? "Free" : "Premium"}
                   </span>
                 </div>
 
@@ -164,21 +189,33 @@ const TutorialPage = () => {
                   className="mb-3"
                 >
                   <Tab eventKey="content" title="Content">
-                    <div 
+                    <div
                       className="tutorial-content mt-3"
-                      dangerouslySetInnerHTML={createMarkup(tutorialData.content)} 
+                      dangerouslySetInnerHTML={createMarkup(
+                        tutorialData.content
+                      )}
                     />
                   </Tab>
-                  <Tab eventKey="code" title="Code" disabled={!tutorialData.code_snippet}>
+                  <Tab
+                    eventKey="code"
+                    title="Code"
+                    disabled={!tutorialData.code_snippet}
+                  >
                     {tutorialData.code_snippet && (
-                      <CodeMirror
-                        value={tutorialData.code_snippet}
-                        extensions={[getCodeMirrorLanguage(tutorialData.code_snippet)]}
-                        readOnly={true}
-                        theme="dark"
-                        height="auto"
-                        className="code-mirror-container"
-                      />
+                      <SyntaxHighlighter
+                        language={language}
+                        style={atomDark}
+                        showLineNumbers={true}
+                        wrapLines={true}
+                        lineProps={{
+                          style: {
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          },
+                        }}
+                      >
+                        {tutorialData.code_snippet}
+                      </SyntaxHighlighter>
                     )}
                   </Tab>
                   <Tab eventKey="json" title="JSON">
@@ -217,7 +254,7 @@ const TutorialPage = () => {
                   <div
                     className="progress-bar"
                     role="progressbar"
-                    style={{ width: '25%' }}
+                    style={{ width: "25%" }}
                     aria-valuenow="25"
                     aria-valuemin="0"
                     aria-valuemax="100"
@@ -231,8 +268,13 @@ const TutorialPage = () => {
 
             <Card className="sidebar-card">
               <Card.Body>
-                <h5 className="sidebar-title">{tutorialData.tutorial} Tutorial</h5>
-                <Accordion activeKey={activeKey} onSelect={(k) => setActiveKey(k)}>
+                <h5 className="sidebar-title">
+                  {tutorialData.tutorial} Tutorial
+                </h5>
+                <Accordion
+                  activeKey={activeKey}
+                  onSelect={(k) => setActiveKey(k)}
+                >
                   <Accordion.Item eventKey="0">
                     <Accordion.Header>All Topics</Accordion.Header>
                     <Accordion.Body className="p-0">
@@ -240,9 +282,11 @@ const TutorialPage = () => {
                         {topicsList.map((topic) => (
                           <li
                             key={topic.id}
-                            className={topic.slug === slug ? 'active' : ''}
+                            className={topic.slug === slug ? "active" : ""}
                           >
-                            <a href={`/tutorial/${tutorialData.tutorial}/${topic.slug}`}>
+                            <a
+                              href={`/tutorial/${tutorialData.tutorial}/${topic.slug}`}
+                            >
                               {topic.title}
                               {topic.order && (
                                 <span className="float-end text-muted">
