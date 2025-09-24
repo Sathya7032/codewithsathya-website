@@ -64,9 +64,9 @@ const [user, setUser] = useState(null);
             <Col md={6}>
               <div className="d-flex align-items-center">
                 <Envelope className="me-2" />
-                <span className="me-3">contact@edusite.com</span>
+                <span className="me-3">codewithsathya4@gmail.com</span>
                 <Phone className="me-2" />
-                <span>+1 (123) 456-7890</span>
+                <span>+91 8519965746</span>
               </div>
             </Col>
             <Col md={6} className="text-md-end">
