@@ -82,11 +82,11 @@ const Footer = () => {
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <Envelope className="me-3" size={16} />
-                <span>contact@edusite.com</span>
+                <span>codewithsathya4@gmail.com</span>
               </li>
               <li className="d-flex align-items-center">
                 <Telephone className="me-3" size={16} />
-                <span>+1 (234) 567-8900</span>
+                <span>+91 8519965746</span>
               </li>
             </ul>
           </Col>
@@ -116,7 +116,7 @@ const Footer = () => {
         <Row className="pt-3 border-top border-secondary">
           <Col md={6} className="text-center text-md-start">
             <p className="text-muted small mb-0">
-              &copy; {new Date().getFullYear()} EduSite. All rights reserved.
+              &copy; {new Date().getFullYear()} codewithsathya. All rights reserved.
             </p>
           </Col>
           <Col md={6} className="text-center text-md-end">
