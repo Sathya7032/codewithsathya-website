@@ -117,7 +117,7 @@ const Technologies = () => {
               </div>
               <div className="tech-card-footer">
                 <a 
-                  href={`/technologies/${tech.slug}`} 
+                  href={`/tutorials`} 
                   className="learn-btn"
                   style={{ backgroundColor: getButtonColor(index) }}
                 >
